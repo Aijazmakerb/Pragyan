@@ -1,13 +1,14 @@
 #include <NewPing.h>
-
+//W for hand tracking
+//w for remote control
 #define TRIG_PIN 12
 #define ECHO_PIN 11
 
 const int en1 = 9;
 const int pin1 = 4;
 const int pin2 = 5;
-const int pin3 = 6;
-const int pin4 = 7;
+const int pin3 = 7;
+const int pin4 = 6;
 const int en2 = 10;
 
 const int speed = 130;
@@ -15,6 +16,10 @@ const int turnSpeed = 150;
 
 const int ir1 = 2;
 const int ir2 = 3;
+
+char command;
+
+int mode = 1;
 
 NewPing sonar(TRIG_PIN, ECHO_PIN);
 
@@ -33,21 +38,45 @@ void setup() {
 }
 
 void loop() {
-  delay(50);  // Wait for stability
+
+  if (Serial.available()) {
+    command = Serial.read();
+    Serial.println(command);
+  }
+
+  if (command == 'W') {
+    mode = 1;
+  } else if (command == 'w') {
+    mode = 2;
+  }
 
   int distance = sonar.ping_cm();
 
   int irLeft = digitalRead(ir1);
   int irRight = digitalRead(ir2);
 
-  if (distance >= 1 && distance <= 15 && irLeft == HIGH && irRight == HIGH) {
-    forward();
-  } else if (irLeft == LOW && irRight == HIGH) {
-    left();
-  } else if (irLeft == HIGH && irRight == LOW) {
-    right();
-  } else {
-    stop();
+  if (mode == 1) {
+    if (command == 'F') {
+      forward();
+    } else if (command == 'L') {
+      left();
+    } else if (command == 'R') {
+      right();
+    } else if (command == 'B') {
+      backward();
+    } else{
+      stop();
+    }
+  } else if (mode == 2) {
+    if (distance >= 1 && distance <= 20) {
+      forward();
+    } else if (irLeft == LOW && irRight == HIGH) {
+      left();
+    } else if (irLeft == HIGH && irRight == LOW) {
+      right();
+    } else {
+      stop();
+    }
   }
 }
 
