@@ -43,7 +43,7 @@ void loop() {
     command = Serial.read();
     Serial.println(command);
   }
-
+ 
   if (command == 'W') {
     mode = 1;
   } else if (command == 'w') {
@@ -64,7 +64,7 @@ void loop() {
       right();
     } else if (command == 'B') {
       backward();
-    } else{
+    } else if (command == 'S') {
       stop();
     }
   } else if (mode == 2) {
