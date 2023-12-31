@@ -10,7 +10,7 @@ const int pin3 = 7;
 const int pin4 = 6;
 const int en2 = 10;
 
-int speed = 80;
+int speed = 160;
 const int turnSpeed = 150;
 
 const int ir1 = 2;
@@ -42,28 +42,34 @@ void loop() {
 
   if (Serial.available()) {
     command = Serial.read();
-    Serial.println(command);
   }
 
   if (command == 'W') {
     mode = 1;
-    speed = 140;
+    command = 'S';
   } else if (command == 'w') {
     mode = 2;
-    speed = 115;
   } else if (command == 'o') {
     mode = 3;
-    speed = 80;
+  }else if(command == 'D' && speed > 0)
+  {
+    speed -= 5;
+    command = 'S';
+  }else if(command == 'I' && speed < 250)
+  {
+    speed += 5;
+    command = 'S';
   }
 
   int distance = sonar.ping_cm();
   delay(50);
+  Serial.println(String(distance));
 
   int irLeft = digitalRead(ir1);
   int irRight = digitalRead(ir2);
 
   if (mode == 1) {
-    if (command == 'F') {
+    if (command == 'F' && distance > 15) {
       forward();
     } else if (command == 'L') {
       left();
@@ -73,15 +79,12 @@ void loop() {
       backward();
     } else if (command == 'S') {
       stop();
-    } else if (command == 'f' && distance < 75) {
+    } else if (command == 'f' && distance > 20) {
       forward();
-      delay(2500);
-      stop();
-      command = 'S';
     } else if (command == 'l') {
       aleft();
       command = 'S';
-    } else if (command = 'r') {
+    } else if (command == 'r') {
       aright();
       command = 'S';
     } else if (command == 'b') {
@@ -89,31 +92,37 @@ void loop() {
       delay(2000);
       stop();
       command = 'S';
+    }else if(command == 't')
+    {
+      rotateRight();
+    }else if(command == 'k')
+    {
+      rotateLeft();
+    }else {
+      command = 'S';
     }
   } else if (mode == 2) {
-    if (distance >= 8 && distance <= 20) {
+    if (distance >= 2 && distance <= 15) {
       forward();
     } else if (irLeft == LOW && irRight == HIGH) {
       left();
     } else if (irLeft == HIGH && irRight == LOW) {
       right();
-    } else if (distance > 0 && distance < 5) {
-      backward();
     } else {
       stop();
     }
   } else if (mode == 3) {
-    if (distance > 20) {
+    if (distance > 25) {
       forward();
-    } else if (distance < 20) {
+    } else if (distance < 25) {
       backward();
-      delay(500);
+      delay(700);
       stop();
       delay(200);
       int var = randomLeftOrRight();
       if (var == 1) {
         aleft();
-      } else {
+      } else if(var == 0) {
         aright();
       }
     }
@@ -204,4 +213,18 @@ void aforward() {
 int randomLeftOrRight() {
   int randomNumber = random(2);
   return randomNumber;
+}
+
+void rotateLeft()
+{
+  left();
+  delay(5000);
+  stop();
+}
+
+void rotateRight()
+{
+  right();
+  delay(5000);
+  stop();
 }
